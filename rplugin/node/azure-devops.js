@@ -82,43 +82,43 @@ class AzureDevOpsPlugin {
   }
 }
 
-// Initialize plugin when Neovim connects
+// Main entry point
 if (require.main === module) {
-  const plugin = (nvim) => {
-    const azurePlugin = new AzureDevOpsPlugin(nvim);
+  const nvim = attach({ reader: process.stdin, writer: process.stdout });
+  const azurePlugin = new AzureDevOpsPlugin(nvim);
 
-    return {
-      azure_devops_connect: async ([orgUrl, token]) => {
-        try {
-          return await azurePlugin.connect(orgUrl, token);
-        } catch (error) {
-          return { error: error.message };
-        }
-      },
-      
-      azure_devops_list_projects: async () => {
-        try {
-          return await azurePlugin.listProjects();
-        } catch (error) {
-          return { error: error.message };
-        }
-      },
-      
-      azure_devops_list_work_items: async ([projectName]) => {
-        try {
-          return await azurePlugin.listWorkItems(projectName);
-        } catch (error) {
-          return { error: error.message };
-        }
+  // Handle RPC requests
+  nvim.channelId.then((channelId) => {
+    // Plugin is ready
+  }).catch((err) => {
+    console.error('Failed to get channel ID:', err);
+  });
+
+  // Listen for requests using nvim.on
+  nvim.on('request', async (method, args, resp) => {
+    try {
+      switch (method) {
+        case 'azure_devops_connect':
+          const result = await azurePlugin.connect(args[0], args[1]);
+          resp.send(result);
+          break;
+        case 'azure_devops_list_projects':
+          const projects = await azurePlugin.listProjects();
+          resp.send(projects);
+          break;
+        case 'azure_devops_list_work_items':
+          const workItems = await azurePlugin.listWorkItems(args[0]);
+          resp.send(workItems);
+          break;
+        default:
+          resp.send({ error: 'Unknown method: ' + method }, true);
       }
-    };
-  };
+    } catch (error) {
+      resp.send({ error: error.message }, true);
+    }
+  });
 
-  attach({ reader: process.stdin, writer: process.stdout }).then((nvim) => {
-    const handlers = plugin(nvim);
-    
-    Object.keys(handlers).forEach(method => {
-      nvim.setRequestHandler(method, handlers[method]);
-    });
+  nvim.on('disconnect', () => {
+    process.exit(0);
   });
 }
