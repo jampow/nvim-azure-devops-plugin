@@ -89,11 +89,31 @@ azure.list_work_items('ProjectName')
 
 ### Vim Commands
 
-```vim
-" Configure first in your init.lua or use :lua commands
-:lua require('azure-devops').setup({organization_url='https://dev.azure.com/your-org', personal_access_token='your-token'})
+First, configure the plugin (add to your init.lua):
+```lua
+require('azure-devops').setup({
+  organization_url = 'https://dev.azure.com/your-org',
+  personal_access_token = 'your-token'
+})
+```
 
-" Then use the commands
+Then use these commands:
+```vim
+" Connect to Azure DevOps
+:AzureDevOpsConnect
+:AzureConnect  " shorter alias
+
+" List all projects
+:AzureDevOpsListProjects
+:AzureProjects  " shorter alias
+
+" List work items for a specific project
+:AzureDevOpsListWorkItems ProjectName
+:AzureWorkItems ProjectName  " shorter alias
+```
+
+Or use the Lua API directly:
+```vim
 :lua require('azure-devops').connect()
 :lua require('azure-devops').list_projects()
 :lua require('azure-devops').list_work_items('ProjectName')

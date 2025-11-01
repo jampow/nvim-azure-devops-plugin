@@ -4,22 +4,12 @@ if exists('g:loaded_azure_devops')
 endif
 let g:loaded_azure_devops = 1
 
-" Set the path to the Node.js script
-let s:script_path = expand('<sfile>:p:h:h') . '/rplugin/node/azure-devops.js'
-
 " Commands
-command! AzureDevOpsConnect :call AzureDevOpsConnect()
-command! AzureDevOpsListProjects :call AzureDevOpsListProjects()
-command! AzureDevOpsListWorkItems :call AzureDevOpsListWorkItems()
+command! AzureDevOpsConnect lua require('azure-devops').connect()
+command! AzureDevOpsListProjects lua require('azure-devops').list_projects()
+command! -nargs=1 AzureDevOpsListWorkItems lua require('azure-devops').list_work_items(<f-args>)
 
-function! AzureDevOpsConnect()
-  echo "Connecting to Azure DevOps..."
-endfunction
-
-function! AzureDevOpsListProjects()
-  echo "Fetching projects..."
-endfunction
-
-function! AzureDevOpsListWorkItems()
-  echo "Fetching work items..."
-endfunction
+" Shorter aliases
+command! AzureConnect lua require('azure-devops').connect()
+command! AzureProjects lua require('azure-devops').list_projects()
+command! -nargs=1 AzureWorkItems lua require('azure-devops').list_work_items(<f-args>)
