@@ -1,0 +1,22 @@
+{
+  "name": "nvim-azure-plugin",
+  "version": "1.0.0",
+  "main": "rplugin/node/azure-devops.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "neovim",
+    "nvim",
+    "azure",
+    "devops",
+    "plugin"
+  ],
+  "author": "",
+  "license": "MIT",
+  "description": "A Neovim plugin to communicate with Azure DevOps using Node.js",
+  "dependencies": {
+    "azure-devops-node-api": "^15.1.1",
+    "neovim": "^5.4.0"
+  }
+}
