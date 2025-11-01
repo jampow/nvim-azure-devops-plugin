@@ -71,23 +71,38 @@ require('azure-devops').setup({
 ```lua
 local azure = require('azure-devops')
 
+-- First, setup the plugin with your credentials
+azure.setup({
+  organization_url = 'https://dev.azure.com/your-organization',
+  personal_access_token = 'your-pat-token'
+})
+
 -- Connect to Azure DevOps
 azure.connect()
 
--- List all projects
+-- List all projects (displays in modal)
 azure.list_projects()
 
--- List work items for a specific project
+-- List work items for a specific project (displays in modal)
 azure.list_work_items('ProjectName')
 ```
 
 ### Vim Commands
 
 ```vim
-:AzureDevOpsConnect
-:AzureDevOpsListProjects
-:AzureDevOpsListWorkItems
+" Configure first in your init.lua or use :lua commands
+:lua require('azure-devops').setup({organization_url='https://dev.azure.com/your-org', personal_access_token='your-token'})
+
+" Then use the commands
+:lua require('azure-devops').connect()
+:lua require('azure-devops').list_projects()
+:lua require('azure-devops').list_work_items('ProjectName')
 ```
+
+### Modal Controls
+
+When a modal window appears:
+- Press `q`, `Esc`, or `Enter` to close the modal
 
 ## Development
 

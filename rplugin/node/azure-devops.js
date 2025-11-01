@@ -83,22 +83,42 @@ class AzureDevOpsPlugin {
 }
 
 // Initialize plugin when Neovim connects
-(async () => {
-  const nvim = await attach({ reader: process.stdin, writer: process.stdout });
-  const plugin = new AzureDevOpsPlugin(nvim);
+if (require.main === module) {
+  const plugin = (nvim) => {
+    const azurePlugin = new AzureDevOpsPlugin(nvim);
 
-  // Register commands
-  nvim.setHandler('azure_devops_connect', async ([orgUrl, token]) => {
-    return await plugin.connect(orgUrl, token);
+    return {
+      azure_devops_connect: async ([orgUrl, token]) => {
+        try {
+          return await azurePlugin.connect(orgUrl, token);
+        } catch (error) {
+          return { error: error.message };
+        }
+      },
+      
+      azure_devops_list_projects: async () => {
+        try {
+          return await azurePlugin.listProjects();
+        } catch (error) {
+          return { error: error.message };
+        }
+      },
+      
+      azure_devops_list_work_items: async ([projectName]) => {
+        try {
+          return await azurePlugin.listWorkItems(projectName);
+        } catch (error) {
+          return { error: error.message };
+        }
+      }
+    };
+  };
+
+  attach({ reader: process.stdin, writer: process.stdout }).then((nvim) => {
+    const handlers = plugin(nvim);
+    
+    Object.keys(handlers).forEach(method => {
+      nvim.setRequestHandler(method, handlers[method]);
+    });
   });
-
-  nvim.setHandler('azure_devops_list_projects', async () => {
-    return await plugin.listProjects();
-  });
-
-  nvim.setHandler('azure_devops_list_work_items', async ([projectName]) => {
-    return await plugin.listWorkItems(projectName);
-  });
-
-  await nvim.outWrite('Azure DevOps plugin loaded!\n');
-})();
+}
