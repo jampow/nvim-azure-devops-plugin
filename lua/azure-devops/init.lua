@@ -4,7 +4,8 @@ local ui = require('azure-devops.ui')
 -- Configuration
 M.config = {
   organization_url = '',
-  personal_access_token = ''
+  personal_access_token = '',
+  auto_connect = false  -- Set to true to connect automatically on startup
 }
 
 M.job_id = nil
@@ -14,9 +15,18 @@ function M.setup(opts)
   opts = opts or {}
   M.config.organization_url = opts.organization_url or M.config.organization_url
   M.config.personal_access_token = opts.personal_access_token or M.config.personal_access_token
+  M.config.auto_connect = opts.auto_connect or M.config.auto_connect
   
   -- Start the Node.js plugin
   M.start_plugin()
+  
+  -- Auto-connect if enabled
+  if M.config.auto_connect then
+    -- Wait a bit for the plugin to be ready
+    vim.defer_fn(function()
+      M.connect_silent()
+    end, 500)
+  end
 end
 
 function M.start_plugin()
@@ -42,7 +52,7 @@ function M.start_plugin()
   end
 end
 
--- Connect to Azure DevOps
+-- Connect to Azure DevOps (with modal)
 function M.connect()
   if not M.job_id then
     M.start_plugin()
@@ -84,6 +94,30 @@ function M.connect()
         '',
         '  Press q or <Esc> to close'
       })
+    end
+  end, 100)
+end
+
+-- Connect silently (for auto-connect on startup, no modal)
+function M.connect_silent()
+  if not M.job_id then
+    M.start_plugin()
+    vim.defer_fn(function() M.connect_silent() end, 500)
+    return
+  end
+  
+  if M.config.organization_url == '' or M.config.personal_access_token == '' then
+    return
+  end
+  
+  vim.defer_fn(function()
+    local success, result = pcall(vim.fn.rpcrequest, M.job_id, 'azure_devops_connect', 
+      M.config.organization_url, M.config.personal_access_token)
+    
+    if success and type(result) == 'string' then
+      vim.notify('Azure DevOps: Connected', vim.log.levels.INFO)
+    elseif success and type(result) == 'table' and result.error then
+      vim.notify('Azure DevOps: Connection failed - ' .. tostring(result.error), vim.log.levels.WARN)
     end
   end, 100)
 end

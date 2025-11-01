@@ -54,9 +54,15 @@ Configure the plugin with your Azure DevOps credentials:
 ```lua
 require('azure-devops').setup({
   organization_url = 'https://dev.azure.com/your-organization',
-  personal_access_token = 'your-personal-access-token'
+  personal_access_token = 'your-personal-access-token',
+  auto_connect = true  -- Optional: automatically connect on startup (default: false)
 })
 ```
+
+**Configuration options:**
+- `organization_url` (string, required): Your Azure DevOps organization URL
+- `personal_access_token` (string, required): Your Personal Access Token
+- `auto_connect` (boolean, optional): If `true`, automatically connects to Azure DevOps when Neovim starts. Default is `false`
 
 ### Getting a Personal Access Token
 

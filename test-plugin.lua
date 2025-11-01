@@ -10,7 +10,8 @@ local azure = require('azure-devops')
 -- Setup with your credentials (REPLACE THESE)
 azure.setup({
   organization_url = 'https://dev.azure.com/your-organization',
-  personal_access_token = 'your-token-here'
+  personal_access_token = 'your-token-here',
+  auto_connect = true  -- Automatically connect on startup
 })
 
 -- Wait a bit for plugin to start
