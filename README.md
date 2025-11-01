@@ -1,4 +1,4 @@
-# nvim-azure-plugin
+# nvim-azure-devops-plugin
 
 A Neovim plugin to communicate with Azure DevOps using Node.js.
 
@@ -21,7 +21,7 @@ A Neovim plugin to communicate with Azure DevOps using Node.js.
 
 ```lua
 use {
-  'yourusername/nvim-azure-plugin',
+  'jampow/nvim-azure-devops-plugin',
   run = 'npm install'
 }
 ```
@@ -30,7 +30,7 @@ use {
 
 ```lua
 {
-  'yourusername/nvim-azure-plugin',
+  'jampow/nvim-azure-devops-plugin',
   build = 'npm install',
   config = function()
     require('azure-devops').setup({
@@ -44,7 +44,7 @@ use {
 ### Using [vim-plug](https://github.com/junegunn/vim-plug)
 
 ```vim
-Plug 'yourusername/nvim-azure-plugin', { 'do': 'npm install' }
+Plug 'jampow/nvim-azure-devops-plugin', { 'do': 'npm install' }
 ```
 
 ## Configuration
@@ -94,7 +94,7 @@ azure.list_work_items('ProjectName')
 ### Project Structure
 
 ```
-nvim-azure-plugin/
+nvim-azure-devops-plugin/
 ├── plugin/              # Vim plugin files
 │   └── azure-devops.vim
 ├── rplugin/            # Remote plugin

@@ -11,39 +11,40 @@ class AzureDevOpsPlugin {
     try {
       const authHandler = azdev.getPersonalAccessTokenHandler(personalAccessToken);
       this.connection = new azdev.WebApi(organizationUrl, authHandler);
-      await this.nvim.outWrite('Connected to Azure DevOps successfully!\n');
-      return true;
+      return 'Connected to Azure DevOps successfully!';
     } catch (error) {
-      await this.nvim.errWrite(`Failed to connect: ${error.message}\n`);
-      return false;
+      throw new Error(`Failed to connect: ${error.message}`);
     }
   }
 
   async listProjects() {
     if (!this.connection) {
-      await this.nvim.errWrite('Not connected to Azure DevOps. Please connect first.\n');
-      return;
+      throw new Error('Not connected to Azure DevOps. Please connect first.');
     }
 
     try {
       const coreApi = await this.connection.getCoreApi();
       const projects = await coreApi.getProjects();
       
-      await this.nvim.outWrite('\nAzure DevOps Projects:\n');
-      await this.nvim.outWrite('======================\n');
+      let output = '';
       
       for (const project of projects) {
-        await this.nvim.outWrite(`- ${project.name} (${project.id})\n`);
+        output += `📁 ${project.name}\n`;
+        if (project.description) {
+          output += `   ${project.description}\n`;
+        }
+        output += `   ID: ${project.id}\n\n`;
       }
+      
+      return output || 'No projects found.';
     } catch (error) {
-      await this.nvim.errWrite(`Failed to list projects: ${error.message}\n`);
+      throw new Error(`Failed to list projects: ${error.message}`);
     }
   }
 
   async listWorkItems(projectName) {
     if (!this.connection) {
-      await this.nvim.errWrite('Not connected to Azure DevOps. Please connect first.\n');
-      return;
+      throw new Error('Not connected to Azure DevOps. Please connect first.');
     }
 
     try {
@@ -58,17 +59,25 @@ class AzureDevOpsPlugin {
         const ids = result.workItems.map(wi => wi.id);
         const workItems = await witApi.getWorkItems(ids);
         
-        await this.nvim.outWrite('\nWork Items:\n');
-        await this.nvim.outWrite('===========\n');
+        let output = '';
         
         for (const wi of workItems) {
-          await this.nvim.outWrite(`#${wi.id} - ${wi.fields['System.Title']} [${wi.fields['System.State']}]\n`);
+          const state = wi.fields['System.State'];
+          const stateIcon = state === 'Active' ? '🔵' : state === 'Closed' ? '✅' : '⚪';
+          output += `${stateIcon} #${wi.id} - ${wi.fields['System.Title']}\n`;
+          output += `   State: ${state}\n`;
+          if (wi.fields['System.AssignedTo']) {
+            output += `   Assigned: ${wi.fields['System.AssignedTo'].displayName}\n`;
+          }
+          output += '\n';
         }
+        
+        return output;
       } else {
-        await this.nvim.outWrite('No work items found.\n');
+        return 'No work items found.';
       }
     } catch (error) {
-      await this.nvim.errWrite(`Failed to list work items: ${error.message}\n`);
+      throw new Error(`Failed to list work items: ${error.message}`);
     }
   }
 }
